@@ -10,5 +10,18 @@ int main(int argc, char** argv) {
     printf("%d %d\n", m.inicio.linha, m.inicio.coluna);
     printf("%d %d", m.fim.linha, m.fim.coluna);
     mostraMapa(&m);
+    
+    printf("\n----------------\n");
+    /*int i,j;
+    for (i = 0; i < m.qtdLinhas; i++) {
+        for (j = 0; j < m.qtdColunas; j++) {
+            printf("\n%d",temObra(i,j,NORTE, &m));
+            printf("\n%d",temObra(i,j,LESTE, &m));
+        }
+
+
+    }*/
+    calcular(&m);
+
 }
 

@@ -3,6 +3,9 @@
 #include <stdio.h>
 #include <stdlib.h>
 
+#define NORTE 1
+#define LESTE 2
+
 typedef struct Posicao{
     int linha;
     int coluna;

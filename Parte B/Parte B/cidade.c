@@ -25,11 +25,22 @@ int stringToInt(char *num) {
 }
 
 void insereObra(int linha, int coluna, Mapa* mapa, char lado){
+    linha--;
+    coluna--;
     if(lado == 'L'){
-        mapa->mapa[linha-1][coluna-1] = LESTE;
+        if(mapa->mapa[linha][coluna] == NORTE){
+            mapa->mapa[linha][coluna] = NORTE_LESTE;
+            return;
+        }
+        mapa->mapa[linha][coluna] = LESTE;
     }
+    
     if(lado == 'N'){
-        mapa->mapa[linha-1][coluna-1] = NORTE;
+        if(mapa->mapa[linha][coluna] == LESTE){
+            mapa->mapa[linha][coluna] = NORTE_LESTE;
+            return;
+        }
+        mapa->mapa[linha][coluna] = NORTE;
     }
 }
 
@@ -240,7 +251,7 @@ int temObra(int linha, int coluna, int direcao, Mapa * mapa) {
             return 1;
         }
         printf(" para (%d,%d)", linha + 1, coluna - 1 + 1);
-        if (mapa->mapa[linha][coluna - 1] == NORTE) {
+        if (mapa->mapa[linha][coluna - 1] == NORTE || mapa->mapa[linha][coluna - 1] == NORTE_LESTE) {
             return 1;
         }
     }
@@ -251,7 +262,7 @@ int temObra(int linha, int coluna, int direcao, Mapa * mapa) {
             return 1;
         }
         printf(" para (%d,%d)", linha - 1 + 1, coluna + 1);
-        if (mapa->mapa[linha - 1][coluna] == LESTE) {
+        if (mapa->mapa[linha - 1][coluna] == LESTE || mapa->mapa[linha - 1][coluna] == NORTE_LESTE) {
             return 1;
         }
     }
@@ -262,7 +273,8 @@ int temObra(int linha, int coluna, int direcao, Mapa * mapa) {
 void calcular(Mapa *m){
     int **count = alocarMatriz(m->qtdLinhas+1, m->qtdColunas+1);
     int **caminho = alocarMatriz(m->qtdLinhas+1, m->qtdColunas+1);
-    
+    /*int maxTam = (m->qtdLinhas-1) 
+    int c[maxTam];*/
     count[m->fim.linha][m->fim.coluna] = 1;
     
     
@@ -274,11 +286,11 @@ void calcular(Mapa *m){
                 printf("\n count[%d][%d]=%d ",i,j-1,count[i][j-1]);
                 count[i][j-1] += count[i][j];
                 printf("count[%d][%d]= %d",i,j-1 , count[i][j-1]);
-                //imprimeCount(count, m);
-                
+                imprimeCount(count, m);
+                caminho[i][j] = -1;
             }else{
                 if (j > 0) {
-                    caminho[i][j-1] = -1; 
+                    //caminho[i][j] = 1; 
                 }
             }
             
@@ -286,11 +298,11 @@ void calcular(Mapa *m){
             if (i > 0 && !temObra(i,j,LESTE,m)) {
                 printf("\n count[%d][%d]",i,j+1);
                 count[i-1][j] += count[i][j];
-                //imprimeCount(count, m);
-                
+                imprimeCount(count, m);
+                caminho[i][j] = 1;
             }else{
                 if (i > 0) {
-                    caminho[i-1][j] = -1;
+                    //caminho[i][j] = 2;
                 }
             }
 

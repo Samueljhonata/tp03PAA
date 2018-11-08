@@ -5,6 +5,7 @@
 
 #define NORTE 1
 #define LESTE 2
+#define NORTE_LESTE 3
 
 typedef struct Posicao{
     int linha;

@@ -3,6 +3,7 @@
 
 //https://programacaodescomplicada.wordpress.com/2012/11/09/aula-64-alocacao-dinamica-pt-6-alocacao-de-matrizes/
 //Adaptado
+
 int** alocarMatriz(int Linhas, int Colunas) { //Recebe a quantidade de Linhas e Colunas como Parâmetro
     int i, j; //Variáveis Auxiliares
     int **m = (char**) malloc(Linhas * sizeof (char*)); //Aloca um Vetor de Ponteiros
@@ -16,6 +17,7 @@ int** alocarMatriz(int Linhas, int Colunas) { //Recebe a quantidade de Linhas e 
     return m; //Retorna o Ponteiro para a Matriz Alocada
 }
 
+//transforma vetor de caracteres em inteiro
 int stringToInt(char *num) {
     int i, n = 0;
     for (i = 0; i < strlen(num); i++) {
@@ -24,19 +26,19 @@ int stringToInt(char *num) {
     return n;
 }
 
-void insereObra(int linha, int coluna, Mapa* mapa, char lado){
+void insereObra(int linha, int coluna, Mapa* mapa, char lado) {
     linha--;
     coluna--;
-    if(lado == 'L'){
-        if(mapa->mapa[linha][coluna] == NORTE){
+    if (lado == 'L') {
+        if (mapa->mapa[linha][coluna] == NORTE) { //caso ja houver norte inserido
             mapa->mapa[linha][coluna] = NORTE_LESTE;
             return;
         }
         mapa->mapa[linha][coluna] = LESTE;
     }
-    
-    if(lado == 'N'){
-        if(mapa->mapa[linha][coluna] == LESTE){
+
+    if (lado == 'N') {
+        if (mapa->mapa[linha][coluna] == LESTE) { //caso ja houver leste inserido
             mapa->mapa[linha][coluna] = NORTE_LESTE;
             return;
         }
@@ -70,7 +72,7 @@ int carregaArquivo(char *nomeArq, Mapa *retorno) {
                         retorno->qtdColunas = stringToInt(numColunas);
                         retorno->mapa = alocarMatriz(retorno->qtdLinhas, retorno->qtdColunas);
                         atual = 0;
-                        cont=0;
+                        cont = 0;
                     } else {
                         if (ch != ' ') {
                             if (atual == 0) {
@@ -92,11 +94,11 @@ int carregaArquivo(char *nomeArq, Mapa *retorno) {
                     if (ch == '\n') {//termina de olhar ponto inicial
                         i = 2;
                         yInicial[cont] = '\0';
-                        retorno->inicio.linha = stringToInt(xInicial)-1;
-                        retorno->inicio.coluna = stringToInt(yInicial)-1;
+                        retorno->inicio.linha = stringToInt(xInicial) - 1;
+                        retorno->inicio.coluna = stringToInt(yInicial) - 1;
                         retorno->mapa[retorno->inicio.linha][retorno->inicio.coluna] = 6;
                         atual = 0;
-                        cont=0;
+                        cont = 0;
                     } else {
                         if (ch != ' ') {
                             if (atual == 0) {
@@ -110,7 +112,7 @@ int carregaArquivo(char *nomeArq, Mapa *retorno) {
                             atual = 1;
                             xInicial[cont] = '\0';
                             cont = 0;
-                            
+
                         }
                     }
                     break;
@@ -119,11 +121,11 @@ int carregaArquivo(char *nomeArq, Mapa *retorno) {
                     if (ch == '\n') {//termina de olhar ponto final
                         i = 3;
                         yFinal[cont] = '\0';
-                        retorno->fim.linha = stringToInt(xFinal)-1;
-                        retorno->fim.coluna = stringToInt(yFinal)-1;
+                        retorno->fim.linha = stringToInt(xFinal) - 1;
+                        retorno->fim.coluna = stringToInt(yFinal) - 1;
                         retorno->mapa[retorno->fim.linha][retorno->fim.coluna] = 9;
                         atual = 0;
-                        cont=0;
+                        cont = 0;
                     } else {
                         if (ch != ' ') {
                             if (atual == 0) {
@@ -137,7 +139,7 @@ int carregaArquivo(char *nomeArq, Mapa *retorno) {
                             atual = 1;
                             xFinal[cont] = '\0';
                             cont = 0;
-                            
+
                         }
                     }
 
@@ -145,44 +147,37 @@ int carregaArquivo(char *nomeArq, Mapa *retorno) {
 
                 default: //locais das obras
                     if (ch == '\n' || ch == EOF) {//termina de olhar local
-                        //i = 2;
                         y[cont] = '\0';
-                        //printf("\n************************** %d %d\n", stringToInt(x),stringToInt(y));
-                        
-                        insereObra(stringToInt(x),stringToInt(y),retorno, lado);
-                        //retorno->mapa[stringToInt(x)][stringToInt(y)] = 1;
+                        insereObra(stringToInt(x), stringToInt(y), retorno, lado);
                         atual = 0;
-                        cont=0;
-                        
+                        cont = 0;
+
                     } else {
                         if (ch != ' ') {
                             if (atual == 0) {
                                 x[cont] = ch;
                                 cont++;
-                            } else if(atual == 1) {
+                            } else if (atual == 1) {
                                 y[cont] = ch;
                                 cont++;
-                            } else if(atual == 2){
+                            } else if (atual == 2) {
                                 lado = ch;
                             }
                         } else {
-                            if(atual == 0){
+                            if (atual == 0) {
                                 atual = 1;
                                 x[cont] = '\0';
                                 cont = 0;
-                            }else if(atual == 1){
+                            } else if (atual == 1) {
                                 atual = 2;
                                 y[cont] = '\0';
-                                //cont = 0;
                             }
-                            
                         }
                     }
-                    
             }
-            if(ch == EOF){
-                            break;
-                        }
+            if (ch == EOF) { //fim do arquivo
+                break;
+            }
         }
     }
 
@@ -190,78 +185,108 @@ int carregaArquivo(char *nomeArq, Mapa *retorno) {
     return 1;
 }
 
-void mostraMapa(Mapa *mapa ){ //imprime o tabuleiro na tela
+//imprime o mapa na tela
+void mostraMapa(Mapa *mapa) { 
     int i, j;
-    printf("\n Tamanho: n%dx%d\n", mapa->qtdLinhas, mapa->qtdColunas);
-    printf(" ");
-    for (i = 0; i <= mapa->qtdColunas; i++) {
-        printf("__");
+    char cI, cF;
+    
+    printf("Mapa:\n");
+    for (i = 0; i <= mapa->qtdLinhas; i++) {//faz borda superior
+        printf("_ _ _ _ ");
     }
-
     printf("\n");
-    for (j = mapa->qtdColunas-1; j >= 0; j--) {
 
+    for (j = mapa->qtdColunas - 1; j >= 0; j--) {
 
+        if (j != mapa->qtdColunas - 1) { //insere as ruas
+            for (i = 0; i < mapa->qtdLinhas - 1; i++) {
+                printf("          ");
+            }
+            printf("      |\n");
+            for (i = 0; i < mapa->qtdLinhas - 1; i++) {
+                printf("|      |MM");
+            }
+
+            printf("|      |\n");
+
+            for (i = 0; i < mapa->qtdLinhas - 1; i++) {
+                if (mapa->mapa[i][j] == NORTE || mapa->mapa[i][j] == NORTE_LESTE) { //olha se tem obra no norte
+                    printf("|  XX  |WW");
+                } else {
+                    printf("|      |WW");
+                }
+            }
+
+            if (mapa->mapa[i][j] == NORTE || mapa->mapa[i][j] == NORTE_LESTE) { //olha se tem obra no norte na ultima coluna
+                printf("|  XX  |\n|");
+            } else {
+                printf("|      |\n|");
+            }
+
+            for (i = 0; i < mapa->qtdLinhas - 1; i++) {
+                printf("          ");
+            }
+
+            printf("      |\n");
+        }
         for (i = 0; i < mapa->qtdLinhas; i++) {
             if (i == 0) {
-                printf(" |");
+                printf("|");
             }
-            printf("(%d,%d)%d|", i+1,j+1, mapa->mapa[i][j]);
-            
+
+            //para posições inicial e final mostrarem de forma diferente
+            if (i == mapa->inicio.linha && j == mapa->inicio.coluna) {
+                cI = '(';
+                cF = ')';
+            } else if (i == mapa->fim.linha && j == mapa->fim.coluna) {
+                cI = '[';
+                cF = ']';
+            } else {
+                cI = ' ';
+                cF = ' ';
+            }
+
+            printf(" %c%d,%d%c", cI, i + 1, j + 1, cF);
+
+            if (i == mapa->qtdLinhas - 1) {
+                printf("|");
+            } else {
+                if (mapa->mapa[i][j] == LESTE || mapa->mapa[i][j] == NORTE_LESTE) { //olha se tem obra no leste
+                    printf(" XX ");
+                } else {
+                    printf("    ");
+                }
+            }
         }
-        printf("|\n");
+        printf("\n|");
     }
 
     printf(" ");
-    for (i = 0; i <= mapa->qtdColunas; i++) {
-        printf("__");
+    for (i = 0; i <= mapa->qtdLinhas; i++) { //faz borda inferior
+        printf("_ _ _ _ ");
     }
-    
-    printf("\n\n");
-    for (i = 0; i < mapa->qtdLinhas; i++) {
-
-
-        for (j = 0; j < mapa->qtdColunas; j++) {
-            if (j == 0) {
-                printf(" |");
-            }
-            printf("(%d,%d)%d|", i+1,j+1, mapa->mapa[i][j]);
-            
-        }
-        printf("|\n");
-    }
-}
+    printf("\n");
+ }
 
 
 //retorna 1 se tem obra ou não existe a posição ou 0 se não tem
 int temObra(int linha, int coluna, int direcao, Mapa * mapa) {
-    printf("\n olhando (%d,%d)", linha + 1, coluna + 1);
-    if (direcao == NORTE) {
-        printf(" N");
-    }
-    if (direcao == LESTE) {
-        printf(" L");
-    }
 
     //se não consigo ir para NORTE, na vdd não consigo ir para DIREITA (i,j+1)
     //se não consigo ir para LESTE, na vdd não consigo ir para BAIXO (i+1,j)
     if (direcao == NORTE) {
-        if (linha >= mapa->qtdLinhas || linha < 0 || (coluna - 1) >= mapa->qtdColunas || (coluna - 1) < 0) {
-            printf(" para (%d,%d) ERRO", linha + 1, coluna - 1 + 1);
+        if (linha >= mapa->qtdLinhas || linha < 0 || (coluna - 1) >= mapa->qtdColunas || (coluna - 1) < 0) { //se estrapolar o mapa
             return 1;
         }
-        printf(" para (%d,%d)", linha + 1, coluna - 1 + 1);
         if (mapa->mapa[linha][coluna - 1] == NORTE || mapa->mapa[linha][coluna - 1] == NORTE_LESTE) {
             return 1;
         }
     }
 
     if (direcao == LESTE) {
-        if ((linha - 1) >= mapa->qtdLinhas || (linha - 1) < 0 || coluna >= mapa->qtdColunas || coluna < 0) {
-             printf(" para (%d,%d) ERO", linha -1 + 1, coluna + 1);
+        if ((linha - 1) >= mapa->qtdLinhas || (linha - 1) < 0 || coluna >= mapa->qtdColunas || coluna < 0) {//se estrapolar o mapa
             return 1;
         }
-        printf(" para (%d,%d)", linha - 1 + 1, coluna + 1);
         if (mapa->mapa[linha - 1][coluna] == LESTE || mapa->mapa[linha - 1][coluna] == NORTE_LESTE) {
             return 1;
         }
@@ -270,69 +295,78 @@ int temObra(int linha, int coluna, int direcao, Mapa * mapa) {
     return 0;
 }
 
-void calcular(Mapa *m){
-    int **count = alocarMatriz(m->qtdLinhas+1, m->qtdColunas+1);
-    int **caminho = alocarMatriz(m->qtdLinhas+1, m->qtdColunas+1);
-    /*int maxTam = (m->qtdLinhas-1) 
-    int c[maxTam];*/
+void calcular(Mapa *m) {
+    int i, j;
+    int **count = alocarMatriz(m->qtdLinhas + 1, m->qtdColunas + 1);
+    int **caminho = alocarMatriz(m->qtdLinhas + 1, m->qtdColunas + 1);
     count[m->fim.linha][m->fim.coluna] = 1;
-    
-    
-    int i,j;
-    for (i = m->qtdLinhas-1; i >= 0; i--) {
-        for (j = m->qtdColunas-1; j >=0; j--) {
-            //printf("\ni=%d  temObra = %d (%d)",i, temObra(i,j,NORTE,m), m->qtdLinhas);
-            if (j > 0 && !temObra(i,j,NORTE,m)) {
-                printf("\n count[%d][%d]=%d ",i,j-1,count[i][j-1]);
-                count[i][j-1] += count[i][j];
-                printf("count[%d][%d]= %d",i,j-1 , count[i][j-1]);
-                imprimeCount(count, m);
-                caminho[i][j] = -1;
-            }else{
-                if (j > 0) {
-                    //caminho[i][j] = 1; 
-                }
-            }
-            
-            //printf("\ni=%d  temObra = %d",i, temObra(i,j,LESTE,m));
-            if (i > 0 && !temObra(i,j,LESTE,m)) {
-                printf("\n count[%d][%d]",i,j+1);
-                count[i-1][j] += count[i][j];
-                imprimeCount(count, m);
-                caminho[i][j] = 1;
-            }else{
-                if (i > 0) {
-                    //caminho[i][j] = 2;
-                }
-            }
 
+    //adaptação feita a partir dos slides
+    for (i = m->qtdLinhas - 1; i >= 0; i--) {
+        for (j = m->qtdColunas - 1; j >= 0; j--) {
+            if (j > 0 && !temObra(i, j, NORTE, m)) {
+                count[i][j - 1] += count[i][j];
+                caminho[i][j] = -1;
+            } 
+
+            if (i > 0 && !temObra(i, j, LESTE, m)) {
+                count[i - 1][j] += count[i][j];
+                caminho[i][j] = 1;
+            }
         }
     }
 
-    imprimeCount(count, m);
-
-    
-    imprimeCount(caminho,m);
-
-    
-}
-
-void imprimeCount(int ** count, Mapa *m){
-    int i,j;
-    /*for (i = 0; i < m->qtdLinhas; i++) {
-        printf("\n");
-        for (j = 0; j < m->qtdColunas; j++) {
-            printf("%d ",count[i][j]);
-
-        }
-    } */
-    
+    printf("Count:");
     printf("\n");
-    for (j = m->qtdColunas-1; j >= 0; j--) {
+    for (j = m->qtdColunas - 1; j >= 0; j--) {
         for (i = 0; i < m->qtdLinhas; i++) {
             printf("%d ", count[i][j]);
-            
         }
         printf("\n");
+    }    
+
+    mostraCaminho(count, m);
+}
+
+void mostraCaminho(int **count, Mapa *m) {
+    int i, j, cont = 0;
+    int tamMax = m->qtdColunas * m->qtdLinhas;
+    Posicao caminho[tamMax];
+    int x = m->inicio.linha, y = m->inicio.coluna;
+
+    while (x < (m->fim.linha) || y < (m->fim.coluna)) { //percorre o caminho
+        if (count[x][y] == 0) {
+            if (x == m->fim.linha - 1 && y == m->fim.coluna - 1) { //chegada
+                caminho[cont].linha = x + 1;
+                caminho[cont].coluna = y + 1;
+                cont++;
+            }
+            break;
+        }
+
+        //insere posição no caminho
+        caminho[cont].linha = x + 1;
+        caminho[cont].coluna = y + 1;
+        cont++;
+
+        if (count[x + 1][y] > 0 && m->mapa[x][y] != LESTE && m->mapa[x][y] != NORTE_LESTE) { //anda pra leste
+            x++;
+        } else if (count[x][y + 1] > 0 && m->mapa[x][y] != NORTE && m->mapa[x][y] != NORTE_LESTE) { //anda pra norte
+            y++;
+        } else { //nao ha caminhos
+            cont = 0;
+            break;
+        }
     }
+
+    printf("\nCaminho possivel: ");
+    for (i = 0; i < cont; i++) {
+        printf("(%d,%d)-> ", caminho[i].linha, caminho[i].coluna);
+    }
+    if (cont > 0) {
+        printf("(%d,%d)", m->fim.linha + 1, m->fim.coluna + 1);
+    } else {
+        printf(" Nao ha caminho!");
+    }
+
 }

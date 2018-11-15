@@ -98,9 +98,6 @@ int carregaArquivo(char *nomeArq, Piramide *retorno) {
                 }
             }
 
-
-
-
             if (ch == EOF) { //fim do arquivo
                 break;
             }
@@ -108,65 +105,75 @@ int carregaArquivo(char *nomeArq, Piramide *retorno) {
     }
 }
 
-int maximo(int v1, int v2) {
+int maximo(int v1, int v2, int *contaComparacoes) {
+    (*contaComparacoes)++;
     if (v1 > v2) {
         return v1;
     }
     return v2;
 }
 
-int recursivo(int i, int j, int **max, Piramide *p) {
+int recursivo(int i, int j, int **max, Piramide *p, int *contaComparacoes, int *contaChamadas) {
+    (*contaChamadas)++;
+    (*contaComparacoes)++;
     if (i == p->qtdLinhas - 1) {
         return p->piramide[i][j];
     }
     
-    max[i][j] = p->piramide[i][j] + maximo(recursivo(i + 1, j, max, p), recursivo(i + 1, j + 1, max, p));
+    max[i][j] = p->piramide[i][j] + maximo(recursivo(i + 1, j, max, p,contaComparacoes,contaChamadas), recursivo(i + 1, j + 1, max, p,contaComparacoes,contaChamadas), contaComparacoes);
     return max[i][j];
 }
 
 void calcularRecursivo(Piramide *p) {
     int **max = alocarMatriz(p->qtdLinhas, p->qtdColunas, INFINITO); /*copiaMatriz(p->piramide, p->qtdLinhas, p->qtdColunas);*/
-    int i = 0, j = 0;
+    int i = 0, j = 0, contaComparacoes = 0, contaChamadas = 0;
 
-    max[0][0] = recursivo(i, j, max, p);
+    max[0][0] = recursivo(i, j, max, p, &contaComparacoes, &contaChamadas);
 
     imprimeResultado(max, p);
+    
+    printf("\n Comparacoes: %d", contaComparacoes);
+    printf("\n Chamadas Recursivas: %d", contaChamadas);
 }
 
-
-
-int memoization(int i, int j, int **max, Piramide *p) {
+int memoization(int i, int j, int **max, Piramide *p, int *contaComparacoes, int *contaChamadas) {
+    (*contaChamadas)++;
+    (*contaComparacoes)++;
     if (i == p->qtdLinhas - 1) {
         return p->piramide[i][j];
     }
     
+    (*contaComparacoes)++;
     if (max[i][j] != INFINITO) {
         return max[i][j];
     }
-    max[i][j] = p->piramide[i][j] + maximo(memoization(i + 1, j, max, p), memoization(i + 1, j + 1, max, p));
+    max[i][j] = p->piramide[i][j] + maximo(memoization(i + 1, j, max, p,contaComparacoes,contaChamadas), memoization(i + 1, j + 1, max, p,contaComparacoes,contaChamadas), contaComparacoes);
     return max[i][j];
 }
 
 void calcularMemoization(Piramide *p) {
     int **max = alocarMatriz(p->qtdLinhas, p->qtdColunas, INFINITO); /*copiaMatriz(p->piramide, p->qtdLinhas, p->qtdColunas);*/
-    int i = 0, j = 0;
+    int i = 0, j = 0, contaComparacoes = 0, contaChamadas = 0;
 
-    max[0][0] = memoization(i, j, max, p);
+    max[0][0] = memoization(i, j, max, p, &contaComparacoes, &contaChamadas);
 
     imprimeResultado(max, p);
+    
+    printf("\n Comparacoes: %d", contaComparacoes);
+    printf("\n Chamadas Recursivas: %d", contaChamadas);
 }
-
-
 
 void calcularTrasFrente(Piramide *p){
     int **max = copiaMatriz(p->piramide, p->qtdLinhas, p->qtdColunas);
-    int i, j;
+    int i, j, contaComparacoes = 0;
     
     //percorre de baixo pra cima, a partir da penultima linha
     for (i = p->qtdLinhas-2; i >= 0; i--) {
         for (j = 0; j < p->qtdColunas ; j++) {
+            contaComparacoes++;
             if (max[i][j] < INFINITO) {
                 //verifica pra qual lado deve ir
+                contaComparacoes++;
                 if ((max[i][j]+max[i+1][j]) > (max[i][j]+max[i+1][j+1])) {
                     max[i][j] += max[i+1][j];
                 }else{
@@ -177,22 +184,13 @@ void calcularTrasFrente(Piramide *p){
     }
 
     imprimeResultado(max,p);
+    printf("\n Comparacoes: %d", contaComparacoes);
 }
 
 void imprimeResultado(int **max, Piramide *p) {
     int i, j, k;
-
-    printf("\n\n Resultado:\n");
-    for (i = 0; i < p->qtdLinhas; i++) {
-        for (j = 0; j < p->qtdColunas; j++) {
-            if (max[i][j] != INFINITO) {
-                printf("%d ", max[i][j]);
-            }
-        }
-        printf("\n");
-    }
-
-    printf("\n\n Maior soma = %d\n", max[0][0]);
+    
+    printf("\n Maior soma = %d\n", max[0][0]);
 
     i = 1;
     j = 0;

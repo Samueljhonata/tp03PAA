@@ -3,7 +3,7 @@
 
 #include <stdio.h>
 #include <stdlib.h>
-#define INFINITO -999999999
+#define INFINITO 999999999
 
 typedef struct Posicao{
     int linha;

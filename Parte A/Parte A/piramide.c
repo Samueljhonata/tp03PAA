@@ -4,23 +4,23 @@
 //https://programacaodescomplicada.wordpress.com/2012/11/09/aula-64-alocacao-dinamica-pt-6-alocacao-de-matrizes/
 //Adaptado
 
-int** alocarMatriz(int Linhas, int Colunas) { //Recebe a quantidade de Linhas e Colunas como Parâmetro
+int** alocarMatriz(int Linhas, int Colunas, int valorPadrao) { //Recebe a quantidade de Linhas e Colunas como Parâmetro
     int i, j; //Variáveis Auxiliares
     int **m = (char**) malloc(Linhas * sizeof (char*)); //Aloca um Vetor de Ponteiros
 
     for (i = 0; i < Linhas; i++) { //Percorre as linhas do Vetor de Ponteiros
         m[i] = (int*) malloc(Colunas * sizeof (int)); //Aloca um Vetor de Inteiros para cada posição do Vetor de Ponteiros.
         for (j = 0; j < Colunas; j++) { //Percorre o Vetor de Inteiros atual.
-            m[i][j] = INFINITO; //Inicializa com infinito.
+            m[i][j] = valorPadrao; 
         }
     }
     return m; //Retorna o Ponteiro para a Matriz Alocada
 }
 
-int** copiaMatriz(int **a, int qtdLinhas, int qtdColunas) { //cria um novo vetor com os mesmos valores do vetor 'a'
+int** copiaMatriz(int **a, int qtdLinhas, int qtdColunas) { //cria uma nova matriz com os mesmos valores da matriz 'a'
     int **retorno;
     int i, j;
-    retorno = alocarMatriz(qtdLinhas, qtdColunas);
+    retorno = alocarMatriz(qtdLinhas, qtdColunas, INFINITO);
 
     for (i = 0; i < qtdLinhas; i++) {
         for (j = 0; j < qtdColunas; j++) {
@@ -75,7 +75,7 @@ int carregaArquivo(char *nomeArq, Piramide *retorno) {
 
         retorno->qtdLinhas = qtdLinhas;
         retorno->qtdColunas = qtdLinhas;
-        retorno->piramide = alocarMatriz(qtdLinhas, qtdLinhas);
+        retorno->piramide = alocarMatriz(qtdLinhas, qtdLinhas, INFINITO);
 
         rewind(arq); //volta para o inicio do arquivo
 
@@ -119,17 +119,64 @@ int recursivo(int i, int j, int **max, Piramide *p) {
     if (i == p->qtdLinhas - 1) {
         return p->piramide[i][j];
     }
+    
     max[i][j] = p->piramide[i][j] + maximo(recursivo(i + 1, j, max, p), recursivo(i + 1, j + 1, max, p));
     return max[i][j];
 }
 
 void calcularRecursivo(Piramide *p) {
-    int **max = copiaMatriz(p->piramide, p->qtdLinhas, p->qtdColunas);
+    int **max = alocarMatriz(p->qtdLinhas, p->qtdColunas, INFINITO); /*copiaMatriz(p->piramide, p->qtdLinhas, p->qtdColunas);*/
     int i = 0, j = 0;
 
     max[0][0] = recursivo(i, j, max, p);
 
     imprimeResultado(max, p);
+}
+
+
+
+int memoization(int i, int j, int **max, Piramide *p) {
+    if (i == p->qtdLinhas - 1) {
+        return p->piramide[i][j];
+    }
+    
+    if (max[i][j] != INFINITO) {
+        return max[i][j];
+    }
+    max[i][j] = p->piramide[i][j] + maximo(memoization(i + 1, j, max, p), memoization(i + 1, j + 1, max, p));
+    return max[i][j];
+}
+
+void calcularMemoization(Piramide *p) {
+    int **max = alocarMatriz(p->qtdLinhas, p->qtdColunas, INFINITO); /*copiaMatriz(p->piramide, p->qtdLinhas, p->qtdColunas);*/
+    int i = 0, j = 0;
+
+    max[0][0] = memoization(i, j, max, p);
+
+    imprimeResultado(max, p);
+}
+
+
+
+void calcularTrasFrente(Piramide *p){
+    int **max = copiaMatriz(p->piramide, p->qtdLinhas, p->qtdColunas);
+    int i, j;
+    
+    //percorre de baixo pra cima, a partir da penultima linha
+    for (i = p->qtdLinhas-2; i >= 0; i--) {
+        for (j = 0; j < p->qtdColunas ; j++) {
+            if (max[i][j] < INFINITO) {
+                //verifica pra qual lado deve ir
+                if ((max[i][j]+max[i+1][j]) > (max[i][j]+max[i+1][j+1])) {
+                    max[i][j] += max[i+1][j];
+                }else{
+                    max[i][j] += max[i+1][j+1];
+                }
+            }
+        }
+    }
+
+    imprimeResultado(max,p);
 }
 
 void imprimeResultado(int **max, Piramide *p) {
@@ -150,20 +197,21 @@ void imprimeResultado(int **max, Piramide *p) {
     i = 1;
     j = 0;
     printf("Caminho:\n%d\n", p->piramide[0][0]);
-    while (i < p->qtdLinhas) {
-        if (max[i][j] > max[i][j + 1]) {
-            for (k = 0; k < j; k++) {
+    while (i < p->qtdLinhas) { //percorre o caminho de cima pra baixo
+        if (max[i][j] > max[i][j + 1]) { //se deve ir pra direita
+            for (k = 0; k < j; k++) {//insere vazio esquerda
                 printf("* ");
             }
             printf("%d ", p->piramide[i][j]);
-        } else {
-            for (k = 0; k < j + 1; k++) {
+            
+        } else { //se deve ir pra esquerda
+            for (k = 0; k < j + 1; k++) {//insere vazio esquerda
                 printf("* ");
             }
             printf("%d ", p->piramide[i][j + 1]);
             j++;
         }
-        for (k = j; k < i; k++) {
+        for (k = j; k < i; k++) { //insere vazio direita
             printf("* ");
         }
         i++;
